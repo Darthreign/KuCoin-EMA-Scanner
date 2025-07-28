@@ -1,0 +1,280 @@
+# 🚀 KuCoin EMA Scanner & Auto Trader
+
+Un programme Python avancé pour scanner automatiquement les cryptomonnaies sur KuCoin et exécuter des trades basés sur les signaux EMA20 avec gestion automatique des Stop Loss et Take Profits via les niveaux de Fibonacci.
+
+## ✨ Fonctionnalités
+
+### 🔍 Scanner Intelligent
+- **Scan temps réel** de tous les coins sur KuCoin
+- **Détection EMA20** : Identifie les coins qui franchissent leur EMA20 en timeframe 4h
+- **Filtre volume** : Détecte les augmentations de volume >50% par rapport à la bougie précédente
+- **Filtre futures** : Ne sélectionne que les coins avec contrats perpétuels disponibles
+- **Nouveaux listings** : Surveillance continue des nouveaux coins listés
+
+### 💰 Trading Automatisé
+- **Ordres intelligents** : Placement automatique d'ordres d'achat avec SL/TP
+- **Fibonacci intégré** : Calcul automatique des niveaux TP basés sur les retracements/extensions Fibonacci (timeframe 15min)
+- **Gestion des risques** : Stop Loss configurables et Take Profits multiples (TP1, TP2, TP3)
+- **Taille de position adaptative** : Calcul automatique basé sur le risque défini
+
+### 🖥️ Interface Utilisateur
+- **Interface Streamlit** moderne et intuitive
+- **Dashboard en temps réel** avec métriques de performance
+- **Configuration flexible** : Paramétrage complet des stratégies
+- **Logs détaillés** : Suivi de toutes les transactions et signaux
+- **Graphiques de performance** : Visualisation des résultats
+
+## 📦 Installation
+
+### Prérequis
+- Python 3.8 ou supérieur
+- Compte KuCoin avec API activée
+- TA-Lib installé sur votre système
+
+### Installation des dépendances
+
+```bash
+# Cloner le projet
+git clone <repository-url>
+cd kucoin-ema-scanner
+
+# Installer les dépendances Python
+pip install -r requirements.txt
+
+# Installation de TA-Lib (requis pour l'analyse technique)
+# Sur Windows : télécharger le wheel depuis https://www.lfd.uci.edu/~gohlke/pythonlibs/#ta-lib
+# Sur macOS : brew install ta-lib
+# Sur Ubuntu/Debian : sudo apt-get install libta-lib-dev
+```
+
+## ⚙️ Configuration
+
+### 1. Configuration API KuCoin
+
+Créez un fichier `.env` à la racine du projet :
+
+```env
+# Configuration KuCoin API
+KUCOIN_API_KEY=your_api_key_here
+KUCOIN_API_SECRET=your_api_secret_here
+KUCOIN_PASSPHRASE=your_passphrase_here
+KUCOIN_SANDBOX=true  # false pour le trading réel
+
+# Configuration optionnelle
+LOG_LEVEL=INFO
+```
+
+### 2. Obtenir les clés API KuCoin
+
+1. Connectez-vous à votre compte [KuCoin](https://www.kucoin.com)
+2. Allez dans **API Management** dans les paramètres
+3. Créez une nouvelle API avec les permissions :
+   - **General** (lecture du compte)
+   - **Trade** (placement d'ordres)
+   - **Futures** (accès aux contrats à terme)
+4. Notez bien votre **Passphrase** lors de la création
+5. Configurez les restrictions IP si nécessaire
+
+### 3. Configuration des paramètres
+
+Le fichier `config.py` contient tous les paramètres configurables :
+
+```python
+# Scanner
+SCAN_INTERVAL = 60  # Intervalle de scan en secondes
+VOLUME_THRESHOLD = 50  # Seuil d'augmentation du volume en %
+EMA_PERIOD = 20  # Période EMA
+
+# Trading
+DEFAULT_POSITION_SIZE = 100  # Taille de position en USDT
+DEFAULT_SL_PERCENT = 2.0  # Stop Loss en %
+TP1_PERCENT = 1.5  # Take Profit 1 en %
+TP2_PERCENT = 3.0  # Take Profit 2 en %
+TP3_PERCENT = 5.0  # Take Profit 3 en %
+```
+
+## 🚀 Utilisation
+
+### Lancement du programme
+
+```bash
+# Lancer l'interface graphique
+streamlit run main.py
+
+# Ou directement
+python main.py
+```
+
+### Tests préliminaires
+
+```bash
+# Vérifier l'installation et la configuration
+python main.py --test
+
+# Afficher l'aide
+python main.py --help
+```
+
+### Utilisation de l'interface
+
+1. **Configuration** : Ajustez les paramètres dans la barre latérale
+2. **Démarrage** : Cliquez sur "▶️ Démarrer" pour lancer le scanner automatique
+3. **Surveillance** : Consultez l'onglet "🎯 Signaux" pour voir les détections
+4. **Trading** : Exécutez les trades manuellement ou configurez l'automatisation
+5. **Suivi** : Surveillez vos positions dans "💼 Trades Actifs"
+
+## 📊 Structure du Projet
+
+```
+/kucoin-ema-scanner/
+├── main.py              # Point d'entrée principal
+├── scanner.py           # Logic de scan et détection des signaux
+├── trading.py           # Gestion des ordres et du trading
+├── gui.py              # Interface utilisateur Streamlit
+├── config.py           # Configuration globale
+├── requirements.txt    # Dépendances Python
+├── README.md          # Documentation
+├── .env               # Variables d'environnement (à créer)
+└── trading.log        # Fichier de logs (généré automatiquement)
+```
+
+## 🛡️ Stratégie de Trading
+
+### Critères de Détection
+1. **EMA20 Crossover** : Le prix franchit l'EMA20 à la hausse sur timeframe 4h
+2. **Volume Spike** : Augmentation du volume >50% par rapport à la bougie précédente
+3. **Contrat Future** : Le coin doit avoir un contrat perpétuel disponible sur KuCoin
+
+### Gestion des Positions
+- **Entrée** : Ordre au marché lors de la détection du signal
+- **Stop Loss** : Calculé automatiquement (défaut : 2% sous le prix d'entrée)
+- **Take Profits** : 3 niveaux basés sur les extensions de Fibonacci
+  - TP1 : 1/3 de la position (niveau 1.272 ou 1.5% par défaut)
+  - TP2 : 1/3 de la position (niveau 1.414 ou 3% par défaut)  
+  - TP3 : 1/3 de la position (niveau 1.618 ou 5% par défaut)
+
+### Calcul Fibonacci
+- **Timeframe** : 15 minutes pour plus de précision
+- **Swing Points** : Détection automatique des hauts/bas récents
+- **Niveaux utilisés** :
+  - Extensions : 1.272, 1.414, 1.618, 2.0, 2.618
+  - Retracements : 0.236, 0.382, 0.5, 0.618, 0.786
+
+## 📈 Fonctionnalités Avancées
+
+### Scanner en Temps Réel
+- Surveillance continue de tous les marchés KuCoin
+- Détection automatique des nouveaux listings
+- Filtrage intelligent des signaux de qualité
+
+### Interface Dashboard
+- **Métriques en temps réel** : Solde, positions, performance
+- **Graphiques interactifs** : Évolution des P&L, historique des trades
+- **Logs détaillés** : Traçabilité complète des opérations
+- **Configuration dynamique** : Modification des paramètres sans redémarrage
+
+### Gestion des Risques
+- **Position Sizing** : Calcul automatique basé sur le risque défini
+- **Stop Loss adaptatif** : Ajustement selon la volatilité du marché
+- **Take Profits échelonnés** : Réduction progressive du risque
+- **Limite de drawdown** : Protection contre les pertes importantes
+
+## ⚠️ Avertissements et Risques
+
+### Risques du Trading Automatisé
+- **Pertes financières** : Le trading comportes des risques de perte en capital
+- **Volatilité** : Les cryptomonnaies sont extrêmement volatiles
+- **Bugs logiciels** : Aucun programme n'est exempt d'erreurs
+- **Conditions de marché** : Les stratégies peuvent ne pas fonctionner dans tous les environnements
+
+### Bonnes Pratiques
+1. **Testez d'abord en sandbox** avant le trading réel
+2. **Commencez avec de petits montants** pour valider la stratégie
+3. **Surveillez régulièrement** les positions ouvertes
+4. **Sauvegardez vos clés API** en sécurité
+5. **Gardez le logiciel à jour** pour les correctifs de sécurité
+
+### Recommandations de Sécurité
+- Utilisez des clés API avec permissions limitées
+- Configurez des restrictions IP sur vos clés API
+- Ne partagez jamais vos clés API ou passphrase
+- Utilisez un VPN si vous tradez depuis des réseaux publics
+- Gardez des sauvegardes de votre configuration
+
+## 🔧 Dépannage
+
+### Problèmes Courants
+
+**Erreur "Exchange non initialisé"**
+- Vérifiez vos clés API dans le fichier `.env`
+- Assurez-vous que les permissions API sont correctes
+- Testez la connexion avec `python main.py --test`
+
+**Erreur "TA-Lib non trouvé"**
+- Installez TA-Lib pour votre système d'exploitation
+- Redémarrez votre environnement Python après installation
+
+**Aucun signal détecté**
+- Vérifiez que le seuil de volume n'est pas trop élevé
+- Assurez-vous que les marchés sont actifs (heures de trading)
+- Consultez les logs pour identifier d'éventuelles erreurs
+
+**Interface Streamlit ne se charge pas**
+- Vérifiez que le port 8501 n'est pas utilisé
+- Essayez `streamlit run main.py --server.port 8502`
+- Videz le cache avec `streamlit cache clear`
+
+## 📚 API et Documentation
+
+### KuCoin API
+- [Documentation officielle](https://docs.kucoin.com/)
+- [Limites de taux](https://docs.kucoin.com/#request-rate-limit)
+- [Code d'erreur](https://docs.kucoin.com/#errors)
+
+### Bibliothèques Utilisées
+- **CCXT** : Connexion aux exchanges de cryptomonnaies
+- **TA-Lib** : Analyse technique et calculs d'indicateurs
+- **Pandas** : Manipulation et analyse de données
+- **Streamlit** : Interface utilisateur web
+- **Plotly** : Graphiques interactifs
+
+## 🤝 Contribution
+
+Les contributions sont les bienvenues ! Pour contribuer :
+
+1. Forkez le projet  
+2. Créez une branche pour votre fonctionnalité (`git checkout -b feature/nouvelle-fonctionnalite`)
+3. Committez vos changements (`git commit -am 'Ajout nouvelle fonctionnalité'`)
+4. Poussez vers la branche (`git push origin feature/nouvelle-fonctionnalite`)
+5. Ouvrez une Pull Request
+
+### Idées d'Améliorations
+- Support d'autres exchanges (Binance, OKX, etc.)
+- Stratégies de trading additionnelles
+- Backtesting intégré
+- Notifications (Discord, Telegram, email)
+- Mode paper trading
+- API REST pour intégrations externes
+
+## 📄 Licence
+
+Ce projet est sous licence MIT. Voir le fichier `LICENSE` pour plus de détails.
+
+## 🆘 Support
+
+Pour obtenir de l'aide :
+
+1. **Issues GitHub** : Signalez les bugs et demandez des fonctionnalités
+2. **Discussions** : Posez vos questions dans les discussions GitHub
+3. **Documentation** : Consultez ce README et les commentaires du code
+
+## 🏆 Remerciements
+
+- **KuCoin** pour leur API robuste et bien documentée
+- **CCXT** pour l'excellente bibliothèque d'accès aux exchanges
+- **Streamlit** pour l'outil de création d'interfaces web en Python
+- **La communauté open source** pour les nombreuses bibliothèques utilisées
+
+---
+
+**⚠️ Avertissement Final :** Ce logiciel est fourni "tel quel" sans aucune garantie. L'utilisation de ce programme pour le trading de cryptomonnaies comporte des risques financiers importants. Les utilisateurs sont entièrement responsables de leurs décisions de trading et de toute perte financière qui pourrait en résulter. Tradez uniquement avec des fonds que vous pouvez vous permettre de perdre.
