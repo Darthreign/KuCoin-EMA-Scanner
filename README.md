@@ -588,5 +588,3 @@ For help:
 **⚠️ Final Disclaimer:** This software is provided "as is" with no warranty. Using this tool for cryptocurrency trading carries significant financial risk. Users are fully responsible for their trading decisions and any financial loss incurred. Only trade with funds you can afford to lose.
 
 ---
-
-Let me know if you want this as a `.md` file or formatted for a specific platform like GitHub.
